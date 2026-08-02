@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Individual Performance Report - Batch U17</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+  :root {
+    --ink: #1f2937;
+    --muted: #6b7280;
+    --line: #d1d5db;
+    --blue: #3b76b5;
+    --red: #b1444a;
+    --accent-bg: #f3f4f6;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    color: var(--ink);
+    margin: 0;
+    background: #e5e7eb;
+  }
+  .page {
+    background: white;
+    width: 210mm;
+    min-height: 297mm;
+    margin: 20px auto;
+    padding: 16mm;
+    page-break-after: always;
+    box-shadow: 0 0 6px rgba(0,0,0,0.15);
+  }
+  .page:last-child { page-break-after: auto; }
+
+  .logos { display: flex; justify-content: space-between; align-items: center; }
+  .logo-box {
+    border: 1px solid var(--line);
+    padding: 8px 20px;
+    font-weight: 600;
+    color: var(--muted);
+  }
+  h1.title { font-size: 20px; text-align: center; margin: 20px 0 4px; }
+  .subtitle { text-align: center; color: var(--muted); margin-bottom: 20px; }
+
+  table.details { width: 100%; border-collapse: collapse; margin-top: 10px; }
+  table.details td { padding: 6px 4px; border-bottom: 1px solid var(--line); font-size: 13px; }
+  table.details td.label { color: var(--muted); width: 35%; }
+
+  h2.section-title {
+    background: var(--accent-bg);
+    padding: 8px 12px;
+    font-size: 15px;
+    margin: 24px 0 12px;
+    border-left: 4px solid var(--blue);
+  }
+
+  .metric-grid { display: flex; gap: 24px; flex-wrap: wrap; }
+  .metric-card { flex: 1; min-width: 220px; }
+  .metric-card h3 { font-size: 13px; color: var(--muted); margin: 0 0 8px; font-weight: 600; }
+  canvas { max-height: 200px; }
+
+  table.data-table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 12px; }
+  table.data-table th, table.data-table td {
+    border: 1px solid var(--line); padding: 5px 8px; text-align: center;
+  }
+  table.data-table th { background: var(--accent-bg); font-weight: 600; }
+  tr.highlight { background: #eaf3e0; font-weight: 600; }
+  tr.best-row td { font-weight: 600; background: #fafafa; }
+
+  .notes-box {
+    margin-top: 16px; padding: 10px 12px; border: 1px dashed var(--line);
+    font-size: 12px; color: var(--muted); min-height: 30px;
+  }
+  .notes-box .label { font-weight: 600; color: var(--ink); display: block; margin-bottom: 4px; }
+
+  .print-btn {
+    position: fixed; top: 16px; right: 16px; padding: 10px 16px;
+    background: var(--blue); color: white; border: none; border-radius: 6px;
+    font-size: 14px; cursor: pointer; z-index: 10;
+  }
+  @media print {
+    body { background: white; }
+    .page { margin: 0; box-shadow: none; }
+    .print-btn { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<button class="print-btn" onclick="window.print()">Print / Save as PDF</button>
+
+<!-- PAGE 1: FRONT PAGE -->
+<div class="page">
+  <div class="logos">
+    <div class="logo-box">Academy</div>
+    <div class="logo-box">PST</div>
+  </div>
+  <h1 class="title">Individual Performance Report - Batch U17</h1>
+  <p class="subtitle">Date: 23 July 2026 &nbsp;|&nbsp; Program: U17 Development Program</p>
+
+  <table class="details">
+    <tr><td class="label">Athlete / Student Name</td><td>Priya Sharma</td></tr>
+    <tr><td class="label">Gender</td><td>Female</td></tr>
+    <tr><td class="label">DOB</td><td>12 Mar 2010</td></tr>
+    <tr><td class="label">Age Group</td><td>15-17 Years</td></tr>
+    <tr><td class="label">Academy Name</td><td>Riverside Sports Academy</td></tr>
+    <tr><td class="label">Sport</td><td>Athletics</td></tr>
+    <tr><td class="label">Position / Role</td><td>Sprinter</td></tr>
+    <tr><td class="label">Coach Name</td><td>Arjun Mehta</td></tr>
+  </table>
+
+  <h2 class="section-title">Performance Summary</h2>
+  <table class="data-table">
+    <tr>
+      <th>CMJ Best (cm)</th><th>Broad Jump Best (cm)</th>
+      <th>Illinois Time (s)</th><th>Arrowhead L (s)</th><th>Arrowhead R (s)</th>
+      <th>30m Sprint Best (s)</th>
+    </tr>
+    <tr>
+      <td>31.2</td>
+      <td>202.0</td>
+      <td>16.42</td>
+      <td>9.1</td>
+      <td>8.9</td>
+      <td>4.62</td>
+    </tr>
+  </table>
+
+  <h2 class="section-title">Overall Performance Profile</h2>
+  <div class="metric-grid">
+    <div class="metric-card" style="max-width: 360px; margin: 0 auto;">
+      <canvas id="radarChart"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE 2: POWER -->
+<div class="page">
+  <h2 class="section-title">Power</h2>
+  <div class="metric-grid">
+    <div class="metric-card">
+      <h3>Counter Movement Jump (cm)</h3>
+      <canvas id="cmjChart"></canvas>
+    </div>
+    <div class="metric-card">
+      <h3>Standing Broad Jump (cm)</h3>
+      <canvas id="broadJumpChart"></canvas>
+    </div>
+  </div>
+
+  <div class="metric-grid" style="margin-top: 20px;">
+    <div class="metric-card">
+      <table class="data-table">
+        <tr><th colspan="2">Vertical Power - CMJ (cm)</th></tr>
+        <tr><th>Turn-1</th><th>Turn-2</th></tr>
+        <tr><td>31.2</td><td>29.8</td></tr>
+        <tr class="best-row"><td colspan="2">Best: 31.2</td></tr>
+      </table>
+    </div>
+    <div class="metric-card">
+      <table class="data-table">
+        <tr><th colspan="2">Standing Broad Jump (cm)</th></tr>
+        <tr><th>Turn-1</th><th>Turn-2</th></tr>
+        <tr><td>198.0</td><td>202.0</td></tr>
+        <tr class="best-row"><td colspan="2">Best: 202.0</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="notes-box"><span class="label">Notes:</span>Good improvement in broad jump on second attempt.</div>
+</div>
+
+<!-- PAGE 3: AGILITY -->
+<div class="page">
+  <h2 class="section-title">Agility</h2>
+  <div class="metric-grid">
+    <div class="metric-card">
+      <h3>Arrowhead Agility (sec)</h3>
+      <canvas id="agilityChart"></canvas>
+    </div>
+    <div class="metric-card">
+      <table class="data-table">
+        <tr><th>Illinois (s)</th><th>Left (s)</th><th>Right (s)</th><th>Best Dir.</th><th>Diff.</th><th>Asym. %</th></tr>
+        <tr>
+          <td>16.42</td>
+          <td>9.1</td>
+          <td>8.9</td>
+          <td>Right</td>
+          <td>0.2</td>
+          <td>2.2%</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+  <h3 style="margin-top: 24px; font-size: 13px; color: var(--muted);">Arrowhead Agility Norms (Age Group: 15-17 Years, Female)</h3>
+  <table class="data-table">
+    <tr><th>Category</th><th>Time (sec)</th><th>Rating</th></tr>
+    
+    <tr class="">
+      <td>Excellent</td><td>< 16.0</td><td>5</td>
+    </tr>
+    
+    <tr class="highlight">
+      <td>Very Good</td><td>16.0 - 17.0</td><td>4</td>
+    </tr>
+    
+    <tr class="">
+      <td>Good</td><td>17.0 - 18.0</td><td>3</td>
+    </tr>
+    
+    <tr class="">
+      <td>Moderate</td><td>18.0 - 19.0</td><td>2</td>
+    </tr>
+    
+    <tr class="">
+      <td>Low</td><td>19.0 - 20.0</td><td>1</td>
+    </tr>
+    
+    <tr class="">
+      <td>Poor</td><td>> 20.0</td><td>0</td>
+    </tr>
+    
+  </table>
+
+  <div class="notes-box"><span class="label">Notes:</span>Slight right-side dominance noted, within normal range.</div>
+</div>
+
+<!-- PAGE 4: SPEED -->
+<div class="page">
+  <h2 class="section-title">Speed - Acceleration</h2>
+  <div class="metric-grid">
+    <div class="metric-card">
+      <h3>30m Sprint Splits (sec)</h3>
+      <canvas id="speedChart"></canvas>
+    </div>
+    <div class="metric-card">
+      <table class="data-table">
+        <tr><th>Split (m)</th><th>Turn-1</th><th>Turn-2</th><th>Turn-3</th><th>Avg</th><th>Min</th><th>Max</th></tr>
+        
+        <tr>
+          <td>0</td><td>0.0</td><td>0.0</td><td>0.0</td>
+          <td>0.0</td><td>0.0</td><td>0.0</td>
+        </tr>
+        
+        <tr>
+          <td>10</td><td>2.01</td><td>1.98</td><td>2.02</td>
+          <td>2.0</td><td>1.98</td><td>2.02</td>
+        </tr>
+        
+        <tr>
+          <td>20</td><td>3.35</td><td>3.3</td><td>3.38</td>
+          <td>3.34</td><td>3.3</td><td>3.38</td>
+        </tr>
+        
+        <tr>
+          <td>30</td><td>4.65</td><td>4.62</td><td>4.7</td>
+          <td>4.66</td><td>4.62</td><td>4.7</td>
+        </tr>
+        
+      </table>
+    </div>
+  </div>
+
+  <h3 style="margin-top: 24px; font-size: 13px; color: var(--muted);">Repeated Sprint Ability (RSA)</h3>
+  <table class="data-table">
+    <tr>
+      <th>Turns</th><th>Avg (s)</th><th>Best (s)</th><th>Slowest (s)</th>
+      <th>Total (s)</th><th>Ideal Total (s)</th><th>Decrement %</th><th>Fatigue Index %</th>
+    </tr>
+    <tr>
+      <td>5</td>
+      <td>4.71</td>
+      <td>4.62</td>
+      <td>4.85</td>
+      <td>23.55</td>
+      <td>23.1</td>
+      <td>1.9%</td>
+      <td>1.6%</td>
+    </tr>
+  </table>
+
+  <div class="notes-box"><span class="label">Notes:</span>Consistent split times, low fatigue index.</div>
+</div>
+
+<script>
+Chart.defaults.font.size = 12;
+const barOpts = {
+  plugins: { legend: { display: false }, tooltip: { enabled: true } },
+  scales: { y: { beginAtZero: true } },
+  responsive: true,
+  maintainAspectRatio: true,
+};
+
+function withLabels(color) {
+  return {
+    backgroundColor: color,
+    borderRadius: 4,
+    datalabels: {}
+  };
+}
+
+new Chart(document.getElementById('cmjChart'), {
+  type: 'bar',
+  data: {
+    labels: ['Turn-1', 'Turn-2'],
+    datasets: [{ data: [31.2, 29.8],
+      backgroundColor: ['#3b76b5', '#b1444a'], borderRadius: 4 }]
+  },
+  options: barOpts
+});
+
+new Chart(document.getElementById('broadJumpChart'), {
+  type: 'bar',
+  data: {
+    labels: ['Turn-1', 'Turn-2'],
+    datasets: [{ data: [198.0, 202.0],
+      backgroundColor: ['#3b76b5', '#b1444a'], borderRadius: 4 }]
+  },
+  options: barOpts
+});
+
+new Chart(document.getElementById('agilityChart'), {
+  type: 'bar',
+  data: {
+    labels: ['Left', 'Right'],
+    datasets: [{ data: [9.1, 8.9],
+      backgroundColor: ['#3b76b5', '#b1444a'], borderRadius: 4 }]
+  },
+  options: barOpts
+});
+
+new Chart(document.getElementById('radarChart'), {
+  type: 'radar',
+  data: {
+    labels: ['Power (Jump)','Power (Broad Jump)','Agility','Acceleration','Sprint Ability','Endurance (RSA)'],
+    datasets: [{
+      label: 'Rating (0-5)',
+      data: [4,4,4,5,4,4],
+      borderColor: '#3b76b5',
+      backgroundColor: 'rgba(59,118,181,0.2)',
+      pointBackgroundColor: '#3b76b5',
+      borderWidth: 2
+    }]
+  },
+  options: {
+    plugins: { legend: { display: false } },
+    scales: {
+      r: {
+        min: 0, max: 5, ticks: { stepSize: 1, backdropColor: 'transparent' },
+        pointLabels: { font: { size: 11 } }
+      }
+    },
+    responsive: true,
+    maintainAspectRatio: true
+  }
+});
+
+new Chart(document.getElementById('speedChart'), {
+  type: 'line',
+  data: {
+    labels: [0,10,20,30],
+    datasets: [{
+      label: 'Avg time (s)',
+      data: [0.0,2.0,3.34,4.66],
+      borderColor: '#3b76b5', backgroundColor: 'rgba(59,118,181,0.15)',
+      fill: true, tension: 0.3, pointRadius: 4
+    }]
+  },
+  options: barOpts
+});
+</script>
+
+</body>
+</html>

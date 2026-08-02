@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>{{ d.report_title }}</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+  :root {
+    --ink: #1f2937;
+    --muted: #6b7280;
+    --line: #d1d5db;
+    --blue: #3b76b5;
+    --red: #b1444a;
+    --accent-bg: #f3f4f6;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    color: var(--ink);
+    margin: 0;
+    background: #e5e7eb;
+  }
+  .page {
+    background: white;
+    width: 210mm;
+    min-height: 297mm;
+    margin: 20px auto;
+    padding: 16mm;
+    page-break-after: always;
+    box-shadow: 0 0 6px rgba(0,0,0,0.15);
+  }
+  .page:last-child { page-break-after: auto; }
+
+  .logos { display: flex; justify-content: space-between; align-items: center; }
+  .logo-box {
+    border: 1px solid var(--line);
+    padding: 8px 20px;
+    font-weight: 600;
+    color: var(--muted);
+  }
+  h1.title { font-size: 20px; text-align: center; margin: 20px 0 4px; }
+  .subtitle { text-align: center; color: var(--muted); margin-bottom: 20px; }
+
+  table.details { width: 100%; border-collapse: collapse; margin-top: 10px; }
+  table.details td { padding: 6px 4px; border-bottom: 1px solid var(--line); font-size: 13px; }
+  table.details td.label { color: var(--muted); width: 35%; }
+
+  h2.section-title {
+    background: var(--accent-bg);
+    padding: 8px 12px;
+    font-size: 15px;
+    margin: 24px 0 12px;
+    border-left: 4px solid var(--blue);
+  }
+
+  .metric-grid { display: flex; gap: 24px; flex-wrap: wrap; }
+  .metric-card { flex: 1; min-width: 220px; }
+  .metric-card h3 { font-size: 13px; color: var(--muted); margin: 0 0 8px; font-weight: 600; }
+  canvas { max-height: 200px; }
+
+  table.data-table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 12px; }
+  table.data-table th, table.data-table td {
+    border: 1px solid var(--line); padding: 5px 8px; text-align: center;
+  }
+  table.data-table th { background: var(--accent-bg); font-weight: 600; }
+  tr.highlight { background: #eaf3e0; font-weight: 600; }
+  tr.best-row td { font-weight: 600; background: #fafafa; }
+
+  .notes-box {
+    margin-top: 16px; padding: 10px 12px; border: 1px dashed var(--line);
+    font-size: 12px; color: var(--muted); min-height: 30px;
+  }
+  .notes-box .label { font-weight: 600; color: var(--ink); display: block; margin-bottom: 4px; }
+
+  .print-btn {
+    position: fixed; top: 16px; right: 16px; padding: 10px 16px;
+    background: var(--blue); color: white; border: none; border-radius: 6px;
+    font-size: 14px; cursor: pointer; z-index: 10;
+  }
+  @media print {
+    body { background: white; }
+    .page { margin: 0; box-shadow: none; }
+    .print-btn { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<button class="print-btn" onclick="window.print()">Print / Save as PDF</button>
+
+<!-- PAGE 1: FRONT PAGE -->
+<div class="page">
+  <div class="logos">
+    <div class="logo-box">{{ d.client_logo_text }}</div>
+    <div class="logo-box">{{ d.provider_logo_text }}</div>
+  </div>
+  <h1 class="title">{{ d.report_title }}</h1>
+  <p class="subtitle">Date: {{ d.date }} &nbsp;|&nbsp; Program: {{ d.program_name }}</p>
+
+  <table class="details">
+    <tr><td class="label">Athlete / Student Name</td><td>{{ d.athlete_name }}</td></tr>
+    <tr><td class="label">Gender</td><td>{{ d.gender }}</td></tr>
+    <tr><td class="label">DOB</td><td>{{ d.dob }}</td></tr>
+    <tr><td class="label">Age Group</td><td>{{ d.age_group }}</td></tr>
+    <tr><td class="label">Academy Name</td><td>{{ d.academy_name }}</td></tr>
+    <tr><td class="label">Sport</td><td>{{ d.sport }}</td></tr>
+    <tr><td class="label">Position / Role</td><td>{{ d.position_role }}</td></tr>
+    <tr><td class="label">Coach Name</td><td>{{ d.coach_name }}</td></tr>
+  </table>
+
+  <h2 class="section-title">Performance Summary</h2>
+  <table class="data-table">
+    <tr>
+      <th>CMJ Best (cm)</th><th>Broad Jump Best (cm)</th>
+      <th>Illinois Time (s)</th><th>Arrowhead L (s)</th><th>Arrowhead R (s)</th>
+      <th>30m Sprint Best (s)</th>
+    </tr>
+    <tr>
+      <td>{{ d.power.cmj.best }}</td>
+      <td>{{ d.power.broad_jump.best }}</td>
+      <td>{{ d.agility.illinois_time }}</td>
+      <td>{{ d.agility.arrowhead.left }}</td>
+      <td>{{ d.agility.arrowhead.right }}</td>
+      <td>{{ d.speed.sprint_30m.time }}</td>
+    </tr>
+  </table>
+
+  <h2 class="section-title">Overall Performance Profile</h2>
+  <div class="metric-grid">
+    <div class="metric-card" style="max-width: 360px; margin: 0 auto;">
+      <canvas id="radarChart"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE 2: POWER -->
+<div class="page">
+  <h2 class="section-title">Power</h2>
+  <div class="metric-grid">
+    <div class="metric-card">
+      <h3>Counter Movement Jump (cm)</h3>
+      <canvas id="cmjChart"></canvas>
+    </div>
+    <div class="metric-card">
+      <h3>Standing Broad Jump (cm)</h3>
+      <canvas id="broadJumpChart"></canvas>
+    </div>
+  </div>
+
+  <div class="metric-grid" style="margin-top: 20px;">
+    <div class="metric-card">
+      <table class="data-table">
+        <tr><th colspan="2">Vertical Power - CMJ (cm)</th></tr>
+        <tr><th>Turn-1</th><th>Turn-2</th></tr>
+        <tr><td>{{ d.power.cmj.turn1 }}</td><td>{{ d.power.cmj.turn2 }}</td></tr>
+        <tr class="best-row"><td colspan="2">Best: {{ d.power.cmj.best }}</td></tr>
+      </table>
+    </div>
+    <div class="metric-card">
+      <table class="data-table">
+        <tr><th colspan="2">Standing Broad Jump (cm)</th></tr>
+        <tr><th>Turn-1</th><th>Turn-2</th></tr>
+        <tr><td>{{ d.power.broad_jump.turn1 }}</td><td>{{ d.power.broad_jump.turn2 }}</td></tr>
+        <tr class="best-row"><td colspan="2">Best: {{ d.power.broad_jump.best }}</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="notes-box"><span class="label">Notes:</span>{{ d.notes.power }}</div>
+</div>
+
+<!-- PAGE 3: AGILITY -->
+<div class="page">
+  <h2 class="section-title">Agility</h2>
+  <div class="metric-grid">
+    <div class="metric-card">
+      <h3>Arrowhead Agility (sec)</h3>
+      <canvas id="agilityChart"></canvas>
+    </div>
+    <div class="metric-card">
+      <table class="data-table">
+        <tr><th>Illinois (s)</th><th>Left (s)</th><th>Right (s)</th><th>Best Dir.</th><th>Diff.</th><th>Asym. %</th></tr>
+        <tr>
+          <td>{{ d.agility.illinois_time }}</td>
+          <td>{{ d.agility.arrowhead.left }}</td>
+          <td>{{ d.agility.arrowhead.right }}</td>
+          <td>{{ d.agility.arrowhead.best_direction }}</td>
+          <td>{{ d.agility.arrowhead.difference }}</td>
+          <td>{{ d.agility.arrowhead.asymmetry_pct }}%</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+  <h3 style="margin-top: 24px; font-size: 13px; color: var(--muted);">Arrowhead Agility Norms (Age Group: {{ d.age_group }}, {{ d.gender }})</h3>
+  <table class="data-table">
+    <tr><th>Category</th><th>Time (sec)</th><th>Rating</th></tr>
+    {% for row in d.agility.norms %}
+    <tr class="{{ 'highlight' if row.highlight else '' }}">
+      <td>{{ row.category }}</td><td>{{ row.range }}</td><td>{{ row.rating }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+
+  <div class="notes-box"><span class="label">Notes:</span>{{ d.notes.agility }}</div>
+</div>
+
+<!-- PAGE 4: SPEED -->
+<div class="page">
+  <h2 class="section-title">Speed - Acceleration</h2>
+  <div class="metric-grid">
+    <div class="metric-card">
+      <h3>30m Sprint Splits (sec)</h3>
+      <canvas id="speedChart"></canvas>
+    </div>
+    <div class="metric-card">
+      <table class="data-table">
+        <tr><th>Split (m)</th><th>Turn-1</th><th>Turn-2</th><th>Turn-3</th><th>Avg</th><th>Min</th><th>Max</th></tr>
+        {% for s in d.speed.splits %}
+        <tr>
+          <td>{{ s.split }}</td><td>{{ s.t1 }}</td><td>{{ s.t2 }}</td><td>{{ s.t3 }}</td>
+          <td>{{ s.avg }}</td><td>{{ s.min }}</td><td>{{ s.max }}</td>
+        </tr>
+        {% endfor %}
+      </table>
+    </div>
+  </div>
+
+  <h3 style="margin-top: 24px; font-size: 13px; color: var(--muted);">Repeated Sprint Ability (RSA)</h3>
+  <table class="data-table">
+    <tr>
+      <th>Turns</th><th>Avg (s)</th><th>Best (s)</th><th>Slowest (s)</th>
+      <th>Total (s)</th><th>Ideal Total (s)</th><th>Decrement %</th><th>Fatigue Index %</th>
+    </tr>
+    <tr>
+      <td>{{ d.speed.rsa.turns }}</td>
+      <td>{{ d.speed.rsa.avg_time }}</td>
+      <td>{{ d.speed.rsa.best_time }}</td>
+      <td>{{ d.speed.rsa.slowest_time }}</td>
+      <td>{{ d.speed.rsa.total_time }}</td>
+      <td>{{ d.speed.rsa.ideal_total }}</td>
+      <td>{{ d.speed.rsa.decrement_pct }}%</td>
+      <td>{{ d.speed.rsa.fatigue_index }}%</td>
+    </tr>
+  </table>
+
+  <div class="notes-box"><span class="label">Notes:</span>{{ d.notes.speed }}</div>
+</div>
+
+<script>
+Chart.defaults.font.size = 12;
+const barOpts = {
+  plugins: { legend: { display: false }, tooltip: { enabled: true } },
+  scales: { y: { beginAtZero: true } },
+  responsive: true,
+  maintainAspectRatio: true,
+};
+
+function withLabels(color) {
+  return {
+    backgroundColor: color,
+    borderRadius: 4,
+    datalabels: {}
+  };
+}
+
+new Chart(document.getElementById('cmjChart'), {
+  type: 'bar',
+  data: {
+    labels: ['Turn-1', 'Turn-2'],
+    datasets: [{ data: [{{ d.power.cmj.turn1 }}, {{ d.power.cmj.turn2 }}],
+      backgroundColor: ['#3b76b5', '#b1444a'], borderRadius: 4 }]
+  },
+  options: barOpts
+});
+
+new Chart(document.getElementById('broadJumpChart'), {
+  type: 'bar',
+  data: {
+    labels: ['Turn-1', 'Turn-2'],
+    datasets: [{ data: [{{ d.power.broad_jump.turn1 }}, {{ d.power.broad_jump.turn2 }}],
+      backgroundColor: ['#3b76b5', '#b1444a'], borderRadius: 4 }]
+  },
+  options: barOpts
+});
+
+new Chart(document.getElementById('agilityChart'), {
+  type: 'bar',
+  data: {
+    labels: ['Left', 'Right'],
+    datasets: [{ data: [{{ d.agility.arrowhead.left }}, {{ d.agility.arrowhead.right }}],
+      backgroundColor: ['#3b76b5', '#b1444a'], borderRadius: 4 }]
+  },
+  options: barOpts
+});
+
+new Chart(document.getElementById('radarChart'), {
+  type: 'radar',
+  data: {
+    labels: [{% for l in d.radar.labels %}'{{ l }}'{{ ',' if not loop.last }}{% endfor %}],
+    datasets: [{
+      label: 'Rating (0-5)',
+      data: [{% for s in d.radar.scores %}{{ s }}{{ ',' if not loop.last }}{% endfor %}],
+      borderColor: '#3b76b5',
+      backgroundColor: 'rgba(59,118,181,0.2)',
+      pointBackgroundColor: '#3b76b5',
+      borderWidth: 2
+    }]
+  },
+  options: {
+    plugins: { legend: { display: false } },
+    scales: {
+      r: {
+        min: 0, max: 5, ticks: { stepSize: 1, backdropColor: 'transparent' },
+        pointLabels: { font: { size: 11 } }
+      }
+    },
+    responsive: true,
+    maintainAspectRatio: true
+  }
+});
+
+new Chart(document.getElementById('speedChart'), {
+  type: 'line',
+  data: {
+    labels: [{% for s in d.speed.splits %}{{ s.split }}{{ ',' if not loop.last }}{% endfor %}],
+    datasets: [{
+      label: 'Avg time (s)',
+      data: [{% for s in d.speed.splits %}{{ s.avg }}{{ ',' if not loop.last }}{% endfor %}],
+      borderColor: '#3b76b5', backgroundColor: 'rgba(59,118,181,0.15)',
+      fill: true, tension: 0.3, pointRadius: 4
+    }]
+  },
+  options: barOpts
+});
+</script>
+
+</body>
+</html>
