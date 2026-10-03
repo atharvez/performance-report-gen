@@ -1,40 +1,34 @@
-﻿# Performance Report Generator ðŸ“Š
+# Performance Report Generator
 
-Automated performance report generation â€” produces clean HTML reports from metrics data.
-
-**Live:** [atharvez.github.io/performance-report-gen](https://atharvez.github.io/performance-report-gen)
+Automated performance report generation -- produces clean HTML reports from metrics data.
 
 ## Overview
 
-Generate professional performance reports from raw metrics. Input JSON data, get a beautifully formatted HTML report ready to share or print.
+Generate professional performance reports from raw metrics. Input JSON data, get a formatted HTML report ready to share or print. Built with a Python data layer and HTML template engine.
 
 ## Tech Stack
 
-- HTML5, CSS3, vanilla JavaScript
-- Chart.js for visualizations
-- GitHub Pages for hosting
+- Python (data.py) -- data processing and report generation
+- HTML / CSS / JS -- report template and rendering
+- Chart.js -- visualizations embedded in reports
 
 ## Usage
 
 ```bash
 git clone https://github.com/atharvez/performance-report-gen.git
 cd performance-report-gen
-# Open index.html directly in browser
-# Or serve locally:
-python -m http.server 8080
+python data.py           # generates report.html from your data
+# Or open report.html directly in the browser
 ```
 
-## Input Format
+## Files
 
-```json
-{
-  "reportTitle": "Q3 Performance Report",
-  "metrics": [
-    { "name": "Response Time", "value": 120, "unit": "ms", "target": 200 }
-  ]
-}
-```
+| File | Purpose |
+|------|---------|
+| data.py | Data processing and template rendering |
+| template.html | Report HTML template |
+| report.html | Generated output report |
 
 ## License
 
-MIT Â© [Atharva Desai](https://github.com/atharvez)
+MIT (c) Atharva Desai
